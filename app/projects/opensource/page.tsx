@@ -1,25 +1,14 @@
-interface Project {
-    id: number;
-    title: string;
-    description: string;
-    type: 'opensource' | 'school';
-    technologies: string[];
-    link?: string;
-}
+import { getProjects, Project } from '@/lib/projects-db';
 
 export default async function OpenSourceProjectsPage() {
-    const response = await fetch(
-        'http://localhost:3000/api/projects?type=opensource'
-    );
-
-    const projects: Project[] = await response.json();
+    const projects: Project[] = await getProjects('opensource');
 
     return (
         <main className='mx-auto max-w-5xl p-8'>
             <h1 className='text-3xl font-bold'>Open Source Projects</h1>
 
             <p className='mt-3 text-gray-600'>
-                These are some of the open source projects I have worked on.
+                Here are the open source contributions I have worked on.
             </p>
 
             <div className='mt-8 grid gap-6 md:grid-cols-2'>
@@ -37,6 +26,11 @@ export default async function OpenSourceProjectsPage() {
                         </p>
 
                         <p className='mt-4 text-sm text-gray-700'>
+                            <span className='font-semibold'>Type:</span>{' '}
+                            {project.type}
+                        </p>
+
+                        <p className='mt-2 text-sm text-gray-700'>
                             <span className='font-semibold'>Technologies:</span>{' '}
                             {project.technologies.join(', ')}
                         </p>

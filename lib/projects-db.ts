@@ -1,4 +1,6 @@
-import { sql } from '@vercel/postgres';
+import { neon } from '@neondatabase/serverless';
+
+export const sql = neon(process.env.DATABASE_URL!);
 
 export interface Project {
     id: number;
@@ -6,37 +8,20 @@ export interface Project {
     description: string;
     type: 'opensource' | 'school';
     technologies: string[];
-    link?: string;
+    link?: string | null; 
 }
 
-export async function getProjects(
-    type?: string | null
-): Promise<Project[]> {
+export async function getProjects(type?: string | null): Promise<Project[]> {
     if (type) {
-        const { rows } = await sql<Project>`
-            SELECT * FROM projects
-            WHERE type = ${type}
-            ORDER BY id
-        `;
-
-        return rows;
+        const projects = await sql`SELECT * FROM projects WHERE type = ${type}` as Project[];
+        return projects;
     }
 
-    const { rows } = await sql<Project>`
-        SELECT * FROM projects
-        ORDER BY id
-    `;
-
-    return rows;
+    const allProjects = await sql`SELECT * FROM projects` as Project[];
+    return allProjects;
 }
 
-export async function getProjectById(
-    id: number
-): Promise<Project | null> {
-    const { rows } = await sql<Project>`
-        SELECT * FROM projects
-        WHERE id = ${id}
-    `;
-
-    return rows[0] ?? null;
+export async function getProjectById(id: number): Promise<Project | null> {
+    const projects = await sql`SELECT * FROM projects WHERE id = ${id}` as Project[];
+    return projects[0] ?? null;
 }
