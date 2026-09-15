@@ -1,3 +1,5 @@
+import { sql } from '@vercel/postgres';
+
 export interface Project {
     id: number;
     title: string;
@@ -7,39 +9,34 @@ export interface Project {
     link?: string;
 }
 
-export const projects: Project[] = [
-    {
-        id: 1,
-        title: 'Portfolio Website',
-        description: 'A personal portfolio website built with Next.js and Tailwind CSS.',
-        type: 'school',
-        technologies: ['Next.js', 'TypeScript', 'Tailwind CSS'],
-    },
-    {
-        id: 2,
-        title: 'Open Source Contribution',
-        description: 'A contribution to an open source project.',
-        type: 'opensource',
-        technologies: ['JavaScript', 'Git', 'GitHub'],
-        link: 'https://github.com/',
-    },
-    {
-        id: 3,
-        title: 'Database Design Project',
-        description: 'A database design project created as part of my coursework.',
-        type: 'school',
-        technologies: ['PostgreSQL', 'SQL'],
-    },
-];
-
-export function getProjects(type?: string | null): Project[] {
+export async function getProjects(
+    type?: string | null
+): Promise<Project[]> {
     if (type) {
-        return projects.filter((project) => project.type === type);
+        const { rows } = await sql<Project>`
+            SELECT * FROM projects
+            WHERE type = ${type}
+            ORDER BY id
+        `;
+
+        return rows;
     }
 
-    return projects;
+    const { rows } = await sql<Project>`
+        SELECT * FROM projects
+        ORDER BY id
+    `;
+
+    return rows;
 }
 
-export function getProjectById(id: number): Project | null {
-    return projects.find((project) => project.id === id) ?? null;
+export async function getProjectById(
+    id: number
+): Promise<Project | null> {
+    const { rows } = await sql<Project>`
+        SELECT * FROM projects
+        WHERE id = ${id}
+    `;
+
+    return rows[0] ?? null;
 }
