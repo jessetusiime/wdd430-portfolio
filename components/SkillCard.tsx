@@ -5,7 +5,7 @@ interface SkillCardProps {
 
 export default function SkillCard({ name, description }: SkillCardProps) {
     return (
-        <div className="rounded-lg border p-6 shadow-sm">
+        <div className="p-4 bg-gray-50 rounded">
             <h3 className="mb-2 text-xl font-bold">{name}</h3>
             <p className="text-gray-600">{description}</p>
         </div>

@@ -1,7 +1,20 @@
-import { getProjects, Project } from '@/lib/projects-db';
+import ProjectSearch from '@/components/ProjectSearch';
+import { fetchFilteredProjects, fetchProjectsPages } from '@/lib/projects-db';
+import Pagination from '@/components/Pagination';
 
-export default async function ProjectsPage() {
-    const projects: Project[] = await getProjects();
+export default async function ProjectsPage(props: {
+    searchParams?: Promise<{ query?: string; page?: string }>;
+}) {
+    const searchParams = await props.searchParams;
+
+    const query = searchParams?.query || '';
+
+    const pageValue = Number(searchParams?.page);
+    const currentPage =
+        Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1;
+
+    const projects = await fetchFilteredProjects(query, currentPage);
+    const totalPages = await fetchProjectsPages(query);
 
     return (
         <main className='mx-auto max-w-5xl p-8'>
@@ -10,6 +23,8 @@ export default async function ProjectsPage() {
             <p className='mt-3 text-gray-600'>
                 Here are some of the projects I have worked on.
             </p>
+
+            <ProjectSearch />
 
             <div className='mt-8 grid gap-6 md:grid-cols-2'>
                 {projects.map((project) => (
@@ -46,6 +61,8 @@ export default async function ProjectsPage() {
                     </article>
                 ))}
             </div>
+
+            <Pagination totalPages={totalPages} />
         </main>
     );
 }
