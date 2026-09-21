@@ -1,6 +1,8 @@
+import Link from 'next/link';
 import ProjectSearch from '@/components/ProjectSearch';
-import { fetchFilteredProjects, fetchProjectsPages } from '@/lib/projects-db';
 import Pagination from '@/components/Pagination';
+import { deleteProject } from '@/app/lib/actions';
+import { fetchFilteredProjects, fetchProjectsPages } from '@/lib/projects-db';
 
 export default async function ProjectsPage(props: {
     searchParams?: Promise<{ query?: string; page?: string }>;
@@ -10,10 +12,12 @@ export default async function ProjectsPage(props: {
     const query = searchParams?.query || '';
 
     const pageValue = Number(searchParams?.page);
+
     const currentPage =
         Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1;
 
     const projects = await fetchFilteredProjects(query, currentPage);
+
     const totalPages = await fetchProjectsPages(query);
 
     return (
@@ -23,6 +27,13 @@ export default async function ProjectsPage(props: {
             <p className='mt-3 text-gray-600'>
                 Here are some of the projects I have worked on.
             </p>
+
+            <Link
+                href='/projects/create'
+                className='mt-4 inline-block rounded bg-blue-700 px-5 py-2 font-medium text-white'
+            >
+                Create Project
+            </Link>
 
             <ProjectSearch />
 
@@ -46,9 +57,16 @@ export default async function ProjectsPage(props: {
                         </p>
 
                         <p className='mt-2 text-sm text-gray-700'>
-                            <span className='font-semibold'>Technologies:</span>{' '}
+                            <span className='font-semibold'>
+                                Technologies:
+                            </span>{' '}
                             {project.technologies.join(', ')}
                         </p>
+
+                        <p className='mt-2 text-sm text-gray-700'>
+                        <span className='font-semibold'>Year Completed:</span>{' '}
+                        {project.year_completed ?? 'Not specified'}
+                    </p>
 
                         {project.link && (
                             <a
@@ -58,6 +76,29 @@ export default async function ProjectsPage(props: {
                                 View Project
                             </a>
                         )}
+
+                        <div className='mt-6 flex gap-3'>
+                            <Link
+                                href={`/projects/${project.id}/edit`}
+                                className='rounded border border-gray-300 px-4 py-2 text-sm font-medium'
+                            >
+                                Edit
+                            </Link>
+
+                            <form
+                                action={deleteProject.bind(
+                                    null,
+                                    project.id.toString()
+                                )}
+                            >
+                                <button
+                                    type='submit'
+                                    className='rounded bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700'
+                                >
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
                     </article>
                 ))}
             </div>
